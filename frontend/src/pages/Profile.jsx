@@ -1,18 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../utils/api.js';
 import { Card } from '../components/Card.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 
 export const Profile = () => {
   const [profile, setProfile] = useState({ full_name: '', email: '' });
   const [fullName, setFullName] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [message, setMessage] = useState('');
+  const { baseCurrency, updateBaseCurrency } = useAuth();
+  const [currency, setCurrency] = useState(baseCurrency);
+  const currencies = ['INR', 'USD', 'EUR'];
+
+  useEffect(() => {
+    setCurrency(baseCurrency);
+  }, [baseCurrency]);
 
   useEffect(() => {
     const load = async () => {
       const res = await api.get('/users/me');
       setProfile(res.data);
       setFullName(res.data.full_name || res.data.fullName || '');
+      if (res.data?.base_currency) {
+        setCurrency(res.data.base_currency);
+      }
     };
     load();
   }, []);
@@ -20,9 +31,14 @@ export const Profile = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     setMessage('');
-    await api.patch('/users/me', { fullName, newPassword: newPassword || undefined });
+    const baseCurrencyUpper = currency?.toUpperCase();
+    const res = await api.patch('/users/me', { fullName, newPassword: newPassword || undefined, baseCurrency: baseCurrencyUpper });
+    setProfile(res.data);
     setMessage('Profile updated');
     setNewPassword('');
+    if (baseCurrencyUpper) {
+      updateBaseCurrency(baseCurrencyUpper, { skipServer: true });
+    }
   };
 
   return (
@@ -41,6 +57,18 @@ export const Profile = () => {
               onChange={(e) => setFullName(e.target.value)}
               className="w-full border rounded px-3 py-2"
             />
+          </div>
+          <div>
+            <label className="text-xs text-slate-600">Base currency</label>
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            >
+              {currencies.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="text-xs text-slate-600">New password</label>

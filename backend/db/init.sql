@@ -6,6 +6,9 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   full_name TEXT NOT NULL,
+  provider TEXT NOT NULL DEFAULT 'local',
+  google_id TEXT UNIQUE,
+  base_currency TEXT NOT NULL DEFAULT 'INR',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -26,7 +29,9 @@ CREATE TABLE IF NOT EXISTS transactions (
   category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
   type TEXT NOT NULL CHECK (type IN ('income', 'expense')),
   amount NUMERIC(14,2) NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'INR',
   description TEXT,
+  receipt_url TEXT,
   occurred_on DATE NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -37,6 +42,7 @@ CREATE TABLE IF NOT EXISTS budgets (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
   amount NUMERIC(14,2) NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'INR',
   period_month SMALLINT NOT NULL CHECK (period_month BETWEEN 1 AND 12),
   period_year INTEGER NOT NULL CHECK (period_year >= 2000),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

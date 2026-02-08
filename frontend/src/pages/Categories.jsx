@@ -7,6 +7,7 @@ export const Categories = () => {
   const [categories, setCategories] = useState([]);
   const { values, onChange, reset, setValues } = useForm({ id: null, name: '', type: 'expense' });
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const load = async () => {
     const res = await api.get('/categories');
@@ -20,11 +21,14 @@ export const Categories = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
     try {
       if (values.id) {
         await api.patch(`/categories/${values.id}`, { name: values.name });
+        setMessage('Category updated');
       } else {
         await api.post('/categories', { name: values.name, type: values.type });
+        setMessage('Category added');
       }
       reset();
       setValues({ id: null, name: '', type: 'expense' });
@@ -41,6 +45,7 @@ export const Categories = () => {
   const handleDelete = async (id) => {
     try {
       await api.delete(`/categories/${id}`);
+      setMessage('Category deleted');
       load();
     } catch (err) {
       setError(err.response?.data?.message || 'Delete failed');
@@ -48,10 +53,11 @@ export const Categories = () => {
   };
 
   return (
-    <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <Card title={values.id ? 'Edit category' : 'Add category'}>
+    <div className="p-6 max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <Card title={values.id ? 'Edit category' : 'Add category'} className="lg:col-span-2">
         <form onSubmit={handleSubmit} className="space-y-3 text-sm">
           {error && <div className="text-red-600 text-xs">{error}</div>}
+          {message && !error && <div className="text-green-700 text-xs">{message}</div>}
           <input
             name="name"
             value={values.name}
@@ -78,20 +84,52 @@ export const Categories = () => {
         </form>
       </Card>
 
-      <Card title="Your categories" action={<span className="text-xs text-slate-500">{categories.length} items</span>}>
-        <div className="space-y-2 text-sm">
-          {categories.map((cat) => (
-            <div key={cat.id} className="flex items-center justify-between border-b pb-2">
-              <div>
-                <div className="font-medium">{cat.name}</div>
-                <div className="text-xs text-slate-500">{cat.type}</div>
-              </div>
-              <div className="flex gap-2 text-xs">
-                <button onClick={() => startEdit(cat)} className="text-ink">Edit</button>
-                <button onClick={() => handleDelete(cat.id)} className="text-red-600">Delete</button>
-              </div>
+      <Card
+        title="Your categories"
+        action={<span className="text-xs text-slate-500">{categories.length} items</span>}
+        className="lg:col-span-3"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
+          <div>
+            <h4 className="text-xs uppercase tracking-wide text-slate-500 mb-3">Expenses</h4>
+            <div className="space-y-4">
+              {categories.filter((c) => c.type === 'expense').map((cat) => (
+                <div key={cat.id} className="flex items-center pb-3 border-b border-slate-100">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium leading-tight break-words">{cat.name}</div>
+                    <div className="text-xs text-slate-500">expense</div>
+                  </div>
+                  <div className="flex gap-4 text-xs text-right">
+                    <button onClick={() => startEdit(cat)} className="text-ink">Edit</button>
+                    <button onClick={() => handleDelete(cat.id)} className="text-red-600">Delete</button>
+                  </div>
+                </div>
+              ))}
+              {categories.filter((c) => c.type === 'expense').length === 0 && (
+                <div className="text-xs text-slate-400">No expense categories</div>
+              )}
             </div>
-          ))}
+          </div>
+          <div>
+            <h4 className="text-xs uppercase tracking-wide text-slate-500 mb-3">Income</h4>
+            <div className="space-y-4">
+              {categories.filter((c) => c.type === 'income').map((cat) => (
+                <div key={cat.id} className="flex items-center pb-3 border-b border-slate-100">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium leading-tight break-words">{cat.name}</div>
+                    <div className="text-xs text-slate-500">income</div>
+                  </div>
+                  <div className="flex gap-4 text-xs text-right">
+                    <button onClick={() => startEdit(cat)} className="text-ink">Edit</button>
+                    <button onClick={() => handleDelete(cat.id)} className="text-red-600">Delete</button>
+                  </div>
+                </div>
+              ))}
+              {categories.filter((c) => c.type === 'income').length === 0 && (
+                <div className="text-xs text-slate-400">No income categories</div>
+              )}
+            </div>
+          </div>
         </div>
       </Card>
     </div>

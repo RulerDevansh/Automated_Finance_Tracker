@@ -11,8 +11,8 @@ export const me = async (req, res, next) => {
 
 export const updateMe = async (req, res, next) => {
   try {
-    const { fullName, newPassword } = req.body;
-    const updated = await userService.updateProfile({ userId: req.user.id, fullName, newPassword });
+    const { fullName, newPassword, baseCurrency } = req.body;
+    const updated = await userService.updateProfile({ userId: req.user.id, fullName, newPassword, baseCurrency });
     res.json(updated);
   } catch (err) {
     next(err);

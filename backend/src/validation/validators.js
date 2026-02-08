@@ -15,7 +15,8 @@ export const authValidators = {
   register: validate([
     body('email').isEmail().withMessage('Valid email required'),
     body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-    body('fullName').notEmpty().withMessage('Full name required')
+    body('fullName').notEmpty().withMessage('Full name required'),
+    body('baseCurrency').optional().isLength({ min: 3, max: 3 })
   ]),
   login: validate([
     body('email').isEmail(),
@@ -37,16 +38,18 @@ export const categoryValidators = {
 export const transactionValidators = {
   create: validate([
     body('type').isIn(['income', 'expense']),
-    body('amount').isDecimal({ force_decimal: true }).withMessage('Amount must be decimal'),
+    body('amount').isDecimal({ decimal_digits: '0,2' }).withMessage('Amount must be a number with up to 2 decimals'),
     body('occurredOn').isISO8601().toDate(),
+    body('currency').optional().isLength({ min: 3, max: 3 }),
     body('description').optional().isString(),
     body('categoryId').optional({ nullable: true }).isUUID()
   ]),
   update: validate([
     param('id').isUUID(),
     body('type').isIn(['income', 'expense']),
-    body('amount').isDecimal({ force_decimal: true }),
+    body('amount').isDecimal({ decimal_digits: '0,2' }),
     body('occurredOn').isISO8601().toDate(),
+    body('currency').optional().isLength({ min: 3, max: 3 }),
     body('description').optional().isString(),
     body('categoryId').optional({ nullable: true }).isUUID()
   ])
@@ -55,7 +58,8 @@ export const transactionValidators = {
 export const budgetValidators = {
   upsert: validate([
     body('categoryId').isUUID(),
-    body('amount').isDecimal({ force_decimal: true }),
+    body('amount').isDecimal({ decimal_digits: '0,2' }),
+    body('currency').optional().isLength({ min: 3, max: 3 }),
     body('periodMonth').isInt({ min: 1, max: 12 }),
     body('periodYear').isInt({ min: 2000 })
   ]),
@@ -67,6 +71,7 @@ export const budgetValidators = {
 export const reportValidators = {
   monthQuery: validate([
     query('year').optional().isInt({ min: 2000 }),
-    query('month').optional().isInt({ min: 1, max: 12 })
+    query('month').optional().isInt({ min: 1, max: 12 }),
+    query('baseCurrency').optional().isLength({ min: 3, max: 3 })
   ])
 };

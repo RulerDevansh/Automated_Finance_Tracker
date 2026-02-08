@@ -1,12 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export const Register = () => {
-  const { register, loading } = useAuth();
+  const { register, googleLogin, loading, baseCurrency } = useAuth();
   const [form, setForm] = useState({ email: '', password: '', fullName: '' });
   const [error, setError] = useState('');
+  const [googleReady, setGoogleReady] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (window.google) {
+      setGoogleReady(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.onload = () => setGoogleReady(true);
+    script.onerror = () => setGoogleReady(false);
+    document.body.appendChild(script);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,6 +76,33 @@ export const Register = () => {
         <p className="text-sm text-center text-slate-600">
           Already have an account? <Link to="/login" className="text-ink font-semibold">Sign in</Link>
         </p>
+        <div className="text-center text-xs text-slate-500">or</div>
+        <button
+          type="button"
+          onClick={() => {
+            setError('');
+            if (!googleReady || !window.google || !import.meta.env.VITE_GOOGLE_CLIENT_ID) {
+              setError('Google Sign-In not available');
+              return;
+            }
+            window.google.accounts.id.initialize({
+              client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+              callback: async (response) => {
+                try {
+                  await googleLogin({ idToken: response.credential, baseCurrency });
+                  navigate('/dashboard');
+                } catch (err) {
+                  setError(err.response?.data?.message || 'Google login failed');
+                }
+              }
+            });
+            window.google.accounts.id.prompt();
+          }}
+          className="w-full border text-slate-700 py-2 rounded hover:bg-slate-50"
+          disabled={!googleReady}
+        >
+          Continue with Google
+        </button>
       </form>
     </div>
   );

@@ -11,11 +11,14 @@ export const getProfile = async (userId) => {
   return user;
 };
 
-export const updateProfile = async ({ userId, fullName, newPassword }) => {
+export const updateProfile = async ({ userId, fullName, newPassword, baseCurrency }) => {
   const updates = { id: userId };
   if (fullName) updates.fullName = fullName;
   if (newPassword) {
     updates.passwordHash = await hashPassword(newPassword);
+  }
+  if (baseCurrency) {
+    updates.baseCurrency = baseCurrency.toUpperCase();
   }
   const user = await updateUser(updates);
   return user;

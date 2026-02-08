@@ -1,36 +1,38 @@
 import { query } from '../config/db.js';
 
-export const createTransaction = async ({ userId, categoryId, type, amount, description, occurredOn }) => {
+export const createTransaction = async ({ userId, categoryId, type, amount, currency, description, occurredOn, receiptUrl }) => {
   const result = await query(
-    `INSERT INTO transactions (user_id, category_id, type, amount, description, occurred_on)
-     VALUES ($1, $2, $3, $4, $5, $6)
-     RETURNING id, user_id, category_id, type, amount, description, occurred_on, created_at`,
-    [userId, categoryId || null, type, amount, description || null, occurredOn]
+    `INSERT INTO transactions (user_id, category_id, type, amount, currency, description, receipt_url, occurred_on)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     RETURNING id, user_id, category_id, type, amount, currency, description, receipt_url, occurred_on, created_at`,
+    [userId, categoryId || null, type, amount, currency || 'INR', description || null, receiptUrl || null, occurredOn]
   );
   return result.rows[0];
 };
 
 export const getTransactionById = async ({ id, userId }) => {
   const result = await query(
-    `SELECT id, user_id, category_id, type, amount, description, occurred_on, created_at, updated_at
+    `SELECT id, user_id, category_id, type, amount, currency, description, receipt_url, occurred_on, created_at, updated_at
      FROM transactions WHERE id = $1 AND user_id = $2`,
     [id, userId]
   );
   return result.rows[0] || null;
 };
 
-export const updateTransaction = async ({ id, userId, categoryId, type, amount, description, occurredOn }) => {
+export const updateTransaction = async ({ id, userId, categoryId, type, amount, currency, description, occurredOn, receiptUrl }) => {
   const result = await query(
     `UPDATE transactions
      SET category_id = $1,
          type = $2,
          amount = $3,
-         description = $4,
-         occurred_on = $5,
+         currency = $4,
+         description = $5,
+         receipt_url = COALESCE($6, receipt_url),
+         occurred_on = $7,
          updated_at = NOW()
-     WHERE id = $6 AND user_id = $7
-     RETURNING id, user_id, category_id, type, amount, description, occurred_on, created_at, updated_at`,
-    [categoryId || null, type, amount, description || null, occurredOn, id, userId]
+     WHERE id = $8 AND user_id = $9
+     RETURNING id, user_id, category_id, type, amount, currency, description, receipt_url, occurred_on, created_at, updated_at`,
+    [categoryId || null, type, amount, currency || 'INR', description || null, receiptUrl || null, occurredOn, id, userId]
   );
   return result.rows[0] || null;
 };
@@ -67,7 +69,7 @@ export const listTransactions = async ({ userId, from, to, type, categoryId, lim
   params.push(limit, offset);
 
   const result = await query(
-    `SELECT id, user_id, category_id, type, amount, description, occurred_on, created_at, updated_at
+    `SELECT id, user_id, category_id, type, amount, currency, description, receipt_url, occurred_on, created_at, updated_at
      FROM transactions
      WHERE ${filters.join(' AND ')}
      ORDER BY occurred_on DESC, created_at DESC

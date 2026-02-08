@@ -1,8 +1,6 @@
-FischerJordan Assignment By Devansh Srivastava
+FischerJordan Assignment By Devansh Srivastava (MIS:- 112315053)
 
 # Personal Finance Tracker
-
-## What was built (aligned to the assignment)
 
 **Day 1-2 (Basic Functionality)**
 - Authentication with JWT: register, login, profile update (name/password).

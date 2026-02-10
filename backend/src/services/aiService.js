@@ -254,10 +254,12 @@ export const handleChat = async ({ userId, message, history = [] }) => {
         }
 
         const catName = pl.categoryName || pl.category;
+        const inferredType = pl.type || (/\b(salary|paycheck|income|bonus|payout|credit|credited|deposit|deposited|transfer in|transfer-in|received|refund)\b/i.test(messageText) ? 'income' : 'expense');
+
         let cat = resolveCategory(catName);
-        if (!cat) {
+        if (!cat || cat.type !== inferredType) {
           try {
-            const created = await createCategory({ userId, name: catName || 'General', type: pl.type || 'expense' });
+            const created = await createCategory({ userId, name: catName || 'General', type: inferredType });
             categories.push(created);
             cat = { id: created.id, name: created.name };
           } catch (err) {
@@ -272,7 +274,7 @@ export const handleChat = async ({ userId, message, history = [] }) => {
         if (!Number.isFinite(amount)) {
           return { reply: 'I need a numeric amount for the transaction.', confirmNeeded: true };
         }
-        const type = pl.type || 'expense';
+        const type = inferredType;
         const currency = (pl.currency || baseCurrency).toUpperCase();
         const description = pl.description || pl.note || 'Added via chat';
         const todayLocal = new Date();

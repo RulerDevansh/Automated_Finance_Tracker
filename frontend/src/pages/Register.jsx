@@ -81,24 +81,32 @@ export const Register = () => {
           type="button"
           onClick={() => {
             setError('');
-            const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-            if (!clientId) {
+            if (!googleReady || !window.google || !import.meta.env.VITE_GOOGLE_CLIENT_ID) {
               setError('Google Sign-In not available');
               return;
             }
-            const redirectUri = `${window.location.origin}/google-callback`;
-            const nonce = crypto.randomUUID();
-            sessionStorage.setItem('google_nonce', nonce);
-            const params = new URLSearchParams({
-              client_id: clientId,
-              redirect_uri: redirectUri,
-              response_type: 'id_token',
-              scope: 'openid email profile',
-              nonce,
-              prompt: 'select_account'
+            window.google.accounts.id.initialize({
+              client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+              use_fedcm_for_prompt: true,
+              ux_mode: 'popup',
+              auto_select: false,
+              callback: async (response) => {
+                try {
+                  await googleLogin({ idToken: response.credential, baseCurrency });
+                  navigate('/dashboard');
+                } catch (err) {
+                  setError(err.response?.data?.message || 'Google login failed');
+                }
+              }
             });
-            const url = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-            window.location.href = url;
+            window.google.accounts.id.prompt((notification) => {
+              if (notification.isNotDisplayed()) {
+                setError(`Google prompt blocked: ${notification.getNotDisplayedReason()}`);
+              }
+              if (notification.isSkippedMoment()) {
+                setError(`Google prompt skipped: ${notification.getSkippedReason()}`);
+              }
+            });
           }}
           className="w-full border text-slate-700 py-2 rounded hover:bg-slate-50"
           disabled={!googleReady}

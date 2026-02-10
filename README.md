@@ -45,3 +45,8 @@ Google Identity script for OAuth UI.
 - Categories cannot be deleted if transactions exist.
 - Receipts are PDF-only; ensure `backend/uploads/receipts` is writable.
 - AI model change automatically from gemini-2.5-flash to gemini-2.5-flash-lite on rate-limit exceed
+
+
+Deployment :- 
+Backend :- Digitalocean
+Frontend :- Vercel

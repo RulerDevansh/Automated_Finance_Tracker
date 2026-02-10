@@ -6,9 +6,8 @@ import { listTransactions } from '../models/transactionModel.js';
 import { setBudget, getBudgets } from './budgetService.js';
 import { addTransaction } from './transactionService.js';
 
-// Default model with automatic fallback when rate-limited
-const primaryModel = 'gemini-2.5-flash';
-const fallbackModel = 'gemini-2.5-flash-lite';
+// Model preference order with automatic fallbacks when rate-limited
+const modelOrder = ['gemini-2.5-flash', 'gemini-3-flash-preview', 'gemini-2.5-flash-lite'];
 
 const getModel = (model = primaryModel) => {
   if (!env.googleApiKey) {
@@ -136,19 +135,18 @@ export const handleChat = async ({ userId, message, history = [] }) => {
   };
 
   let result;
-  try {
-    result = await generate(primaryModel);
-  } catch (err) {
-    if (isRateLimit(err)) {
-      try {
-        result = await generate(fallbackModel);
-      } catch (fallbackErr) {
-        throw fallbackErr;
-      }
-    } else {
-      throw err;
+  let lastErr;
+  for (const modelName of modelOrder) {
+    try {
+      result = await generate(modelName);
+      lastErr = null;
+      break;
+    } catch (err) {
+      lastErr = err;
+      if (!isRateLimit(err)) break;
     }
   }
+  if (!result) throw lastErr;
 
   let data;
   try {

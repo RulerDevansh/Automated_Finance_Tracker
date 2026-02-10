@@ -252,7 +252,8 @@ export const handleChat = async ({ userId, message, history = [] }) => {
         }
 
         const catName = pl.categoryName || pl.category;
-        const inferredType = pl.type || (/\b(salary|paycheck|income|bonus|payout|credit|credited|deposit|deposited|transfer in|transfer-in|received|refund)\b/i.test(messageText) ? 'income' : 'expense');
+        const incomeHint = /\b(salary|paycheck|income|bonus|payout|credit|credited|deposit|deposited|transfer in|transfer-in|received|refund)\b/i.test(messageText);
+        const inferredType = incomeHint ? 'income' : (pl.type || 'expense');
 
         let cat = resolveCategory(catName);
         if (!cat || cat.type !== inferredType) {

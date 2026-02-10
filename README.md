@@ -44,7 +44,7 @@ Google Identity script for OAuth UI.
 - Amounts normalized to 2 decimals; refunds supported via negative amounts.
 - Categories cannot be deleted if transactions exist.
 - Receipts are PDF-only; ensure `backend/uploads/receipts` is writable.
-- AI model change automatically from gemini-2.5-flash to gemini-2.5-flash-lite on rate-limit exceed
+- AI model auto-fallback order: gemini-2.5-flash → gemini-3-flash-preview → gemini-2.5-flash-lite when rate-limited
 
 
 Deployment :- 

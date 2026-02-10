@@ -56,8 +56,8 @@ export const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-      <div className="text-xs uppercase tracking-wide text-slate-500 text-center">
-        FischerJordan Assignment By Devansh Srivastava (Mis :- 112315053)
+      <div className="text-xs tracking-wide text-slate-500 text-center">
+        <a href="https://github.com/RulerDevansh">Made By Devansh Srivastava (@RulerDevansh</a>)
       </div>
       <form onSubmit={handleSubmit} className="bg-white w-full max-w-md shadow-lg rounded-xl p-8 space-y-4">
         <div className="text-center space-y-1">

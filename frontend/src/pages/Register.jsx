@@ -85,10 +85,11 @@ export const Register = () => {
               setError('Google Sign-In not available');
               return;
             }
+            const uxMode = import.meta.env.VITE_GOOGLE_UX_MODE || 'redirect';
             window.google.accounts.id.initialize({
               client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
               use_fedcm_for_prompt: true,
-              ux_mode: 'popup',
+              ux_mode: uxMode,
               auto_select: false,
               callback: async (response) => {
                 try {

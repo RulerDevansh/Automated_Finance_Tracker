@@ -8,7 +8,10 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET || 'change-me',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
-  corsOrigin: process.env.CORS_ORIGIN || '*',
+  corsOrigins: (process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || 'http://localhost:5173,https://financetrackeraipowered.vercel.app')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
   googleClientId: process.env.GOOGLE_CLIENT_ID,
   googleApiKey: process.env.GOOGLE_API_KEY,
   googleModel: process.env.GOOGLE_MODEL,

@@ -8,7 +8,18 @@ import { notFound, errorHandler } from './middlewares/errorHandler.js';
 
 const app = express();
 
-app.use(cors({ origin: env.corsOrigin, credentials: true }));
+const corsOptions = {
+	origin: (origin, callback) => {
+		if (!origin) return callback(null, true);
+		const allowed = env.corsOrigins;
+		return allowed.includes(origin)
+			? callback(null, true)
+			: callback(new Error('Not allowed by CORS'));
+	},
+	credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(morgan('dev'));
 app.use('/uploads', express.static(path.resolve('uploads')));

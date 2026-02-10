@@ -15,9 +15,17 @@ const storage = multer.diskStorage({
   }
 });
 
+const allowed = [
+  'application/pdf',
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/webp'
+];
+
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype !== 'application/pdf') {
-    return cb(new Error('Only PDF receipts are allowed'));
+  if (!allowed.includes(file.mimetype)) {
+    return cb(new Error('Only PDF or image (png/jpg/jpeg/webp) receipts are allowed'));
   }
   cb(null, true);
 };

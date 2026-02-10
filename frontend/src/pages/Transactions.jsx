@@ -139,8 +139,13 @@ export const Transactions = () => {
             className="border rounded w-full px-2 py-2"
           />
           <div>
-            <label className="text-xs text-slate-600">Receipt (PDF, optional)</label>
-            <input type="file" accept="application/pdf" onChange={(e) => setReceiptFile(e.target.files?.[0] || null)} className="w-full text-sm" />
+            <label className="text-xs text-slate-600">Receipt (PDF or image, optional)</label>
+            <input
+              type="file"
+              accept="application/pdf,image/png,image/jpeg,image/jpg,image/webp"
+              onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+              className="w-full text-sm"
+            />
           </div>
           <div className="flex gap-2">
             <button className="bg-ink text-white px-3 py-2 rounded" type="submit">

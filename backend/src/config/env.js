@@ -10,6 +10,8 @@ export const env = {
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
   corsOrigin: process.env.CORS_ORIGIN || '*',
   googleClientId: process.env.GOOGLE_CLIENT_ID,
+  googleApiKey: process.env.GOOGLE_API_KEY,
+  googleModel: process.env.GOOGLE_MODEL,
   smtpHost: process.env.SMTP_HOST,
   smtpPort: Number(process.env.SMTP_PORT || 587),
   smtpUser: process.env.SMTP_USER,

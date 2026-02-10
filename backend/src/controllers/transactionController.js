@@ -1,4 +1,5 @@
 import * as transactionService from '../services/transactionService.js';
+import { env } from '../config/env.js';
 
 export const list = async (req, res, next) => {
   try {
@@ -65,7 +66,7 @@ export const uploadReceipt = async (req, res, next) => {
     const tx = await transactionService.attachReceipt({
       id: req.params.id,
       userId: req.user.id,
-      receiptUrl: `/uploads/receipts/${req.file.filename}`
+      receiptUrl: `${env.baseUrl.replace(/\/$/, '')}/uploads/receipts/${req.file.filename}`
     });
     res.json({ receiptUrl: tx.receipt_url });
   } catch (err) {

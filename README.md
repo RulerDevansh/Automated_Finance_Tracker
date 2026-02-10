@@ -15,6 +15,12 @@ FischerJordan Assignment By Devansh Srivastava (MIS:- 112315053)
 - Receipt upload: multer accepts PDF, stored under `backend/uploads/receipts`, served statically; attach per transaction.
 - Multiple currencies: transactions and budgets carry currency; user-selectable base currency for dashboard/reports; free FX via frankfurter.app; selectors on dashboard, reports, transactions, budgets, profile.
 
+**Day 4+ AI Copilot & UX**
+- Chatbot (Gemini) can add transactions or set budgets by plain text. It understands today/yesterday/ISO dates and only remembers messages in the current chat session.
+- If a category is missing, it can create a broad one and then log the expense in one go. It asks for confirmation before running any batch of actions.
+- Chat widget: clears history when closed, darker chat button, and a small “need help?” nudge that appears sometimes while closed.
+- Safety: confirmation flags stop unintended runs
+
 ## Tech Stack
 - Backend: 
 Node.js + Express,
@@ -38,3 +44,4 @@ Google Identity script for OAuth UI.
 - Amounts normalized to 2 decimals; refunds supported via negative amounts.
 - Categories cannot be deleted if transactions exist.
 - Receipts are PDF-only; ensure `backend/uploads/receipts` is writable.
+- AI model change automatically from gemini-2.5-flash to gemini-2.5-flash-lite on rate-limit exceed

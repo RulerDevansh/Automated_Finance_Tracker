@@ -5,6 +5,7 @@ import categoryRoutes from './categoryRoutes.js';
 import transactionRoutes from './transactionRoutes.js';
 import budgetRoutes from './budgetRoutes.js';
 import reportRoutes from './reportRoutes.js';
+import aiRoutes from './aiRoutes.js';
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use('/categories', categoryRoutes);
 router.use('/transactions', transactionRoutes);
 router.use('/budgets', budgetRoutes);
 router.use('/reports', reportRoutes);
+router.use('/ai', aiRoutes);
 
 export default router;

@@ -12,11 +12,13 @@ import { Reports } from './pages/Reports.jsx';
 import { NotFound } from './pages/NotFound.jsx';
 import { Categories } from './pages/Categories.jsx';
 import { Profile } from './pages/Profile.jsx';
+import { Chatbot } from './components/Chatbot.jsx';
 
 const Shell = ({ children }) => (
   <div className="min-h-screen bg-sand">
     <NavBar />
     <main className="max-w-6xl mx-auto">{children}</main>
+    <Chatbot />
   </div>
 );
 

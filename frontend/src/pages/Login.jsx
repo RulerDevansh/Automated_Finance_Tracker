@@ -42,6 +42,8 @@ export const Login = () => {
     }
     window.google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      ux_mode: 'popup',
+      auto_select: false,
       callback: async (response) => {
         try {
           await googleLogin({ idToken: response.credential, baseCurrency });
@@ -51,7 +53,14 @@ export const Login = () => {
         }
       }
     });
-    window.google.accounts.id.prompt();
+    window.google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed()) {
+        setError(`Google prompt blocked: ${notification.getNotDisplayedReason()}`);
+      }
+      if (notification.isSkippedMoment()) {
+        setError(`Google prompt skipped: ${notification.getSkippedReason()}`);
+      }
+    });
   };
 
   return (

@@ -5,6 +5,7 @@ import { ProtectedRoute } from './components/ProtectedRoute.jsx';
 import { NavBar } from './components/NavBar.jsx';
 import { Login } from './pages/Login.jsx';
 import { Register } from './pages/Register.jsx';
+import { GoogleCallback } from './pages/GoogleCallback.jsx';
 import { Dashboard } from './pages/Dashboard.jsx';
 import { Transactions } from './pages/Transactions.jsx';
 import { Budgets } from './pages/Budgets.jsx';
@@ -27,6 +28,7 @@ const App = () => (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/google-callback" element={<GoogleCallback />} />
       <Route
         path="/"
         element={<Navigate to="/dashboard" replace />}

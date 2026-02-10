@@ -87,6 +87,7 @@ export const Register = () => {
             }
             window.google.accounts.id.initialize({
               client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+              use_fedcm_for_prompt: true,
               ux_mode: 'popup',
               auto_select: false,
               callback: async (response) => {

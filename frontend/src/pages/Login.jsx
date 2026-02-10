@@ -1,27 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import GoogleLoginButton from '../components/GoogleLoginButton.jsx';
 
 export const Login = () => {
   const { login, googleLogin, loading, baseCurrency } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [googleReady, setGoogleReady] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (window.google) {
-      setGoogleReady(true);
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.onload = () => setGoogleReady(true);
-    script.onerror = () => setGoogleReady(false);
-    document.body.appendChild(script);
-  }, []);
+  const [googleReady, setGoogleReady] = useState(true);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,35 +22,15 @@ export const Login = () => {
     }
   };
 
-  const handleGoogle = () => {
+  const handleCredential = useCallback(async (credential) => {
     setError('');
-    if (!googleReady || !window.google || !import.meta.env.VITE_GOOGLE_CLIENT_ID) {
-      setError('Google Sign-In not available');
-      return;
+    try {
+      await googleLogin({ idToken: credential, baseCurrency });
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Google login failed');
     }
-    window.google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      use_fedcm_for_prompt: true,
-      ux_mode: 'popup',
-      auto_select: false,
-      callback: async (response) => {
-        try {
-          await googleLogin({ idToken: response.credential, baseCurrency });
-          navigate('/dashboard');
-        } catch (err) {
-          setError(err.response?.data?.message || 'Google login failed');
-        }
-      }
-    });
-    window.google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed()) {
-        setError(`Google prompt blocked: ${notification.getNotDisplayedReason()}`);
-      }
-      if (notification.isSkippedMoment()) {
-        setError(`Google prompt skipped: ${notification.getSkippedReason()}`);
-      }
-    });
-  };
+  }, [googleLogin, baseCurrency, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-4">
@@ -99,14 +67,7 @@ export const Login = () => {
           New here? <Link to="/register" className="text-mint font-semibold">Create an account</Link>
         </p>
         <div className="text-center text-xs text-slate-500">or</div>
-        <button
-          type="button"
-          onClick={handleGoogle}
-          className="w-full border text-slate-700 py-2 rounded hover:bg-slate-50"
-          disabled={!googleReady}
-        >
-          Continue with Google
-        </button>
+        <GoogleLoginButton onCredential={handleCredential} disabled={!googleReady} />
       </form>
     </div>
   );

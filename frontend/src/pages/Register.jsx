@@ -1,13 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import GoogleLoginButton from '../components/GoogleLoginButton.jsx';
 
 export const Register = () => {
   const { register, googleLogin, loading, baseCurrency } = useAuth();
   const [form, setForm] = useState({ email: '', password: '', fullName: '' });
   const [error, setError] = useState('');
-  const [googleReady, setGoogleReady] = useState(false);
+  const [googleReady, setGoogleReady] = useState(true);
   const navigate = useNavigate();
+  const handleCredential = useCallback(async (credential) => {
+    setError('');
+    try {
+      await googleLogin({ idToken: credential, baseCurrency });
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Google login failed');
+    }
+  }, [googleLogin, baseCurrency, navigate]);
 
   useEffect(() => {
     if (window.google) {
@@ -77,42 +87,7 @@ export const Register = () => {
           Already have an account? <Link to="/login" className="text-ink font-semibold">Sign in</Link>
         </p>
         <div className="text-center text-xs text-slate-500">or</div>
-        <button
-          type="button"
-          onClick={() => {
-            setError('');
-            if (!googleReady || !window.google || !import.meta.env.VITE_GOOGLE_CLIENT_ID) {
-              setError('Google Sign-In not available');
-              return;
-            }
-            window.google.accounts.id.initialize({
-              client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-              use_fedcm_for_prompt: true,
-              ux_mode: 'popup',
-              auto_select: false,
-              callback: async (response) => {
-                try {
-                  await googleLogin({ idToken: response.credential, baseCurrency });
-                  navigate('/dashboard');
-                } catch (err) {
-                  setError(err.response?.data?.message || 'Google login failed');
-                }
-              }
-            });
-            window.google.accounts.id.prompt((notification) => {
-              if (notification.isNotDisplayed()) {
-                setError(`Google prompt blocked: ${notification.getNotDisplayedReason()}`);
-              }
-              if (notification.isSkippedMoment()) {
-                setError(`Google prompt skipped: ${notification.getSkippedReason()}`);
-              }
-            });
-          }}
-          className="w-full border text-slate-700 py-2 rounded hover:bg-slate-50"
-          disabled={!googleReady}
-        >
-          Continue with Google
-        </button>
+        <GoogleLoginButton onCredential={handleCredential} disabled={!googleReady} />
       </form>
     </div>
   );

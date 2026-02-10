@@ -1,11 +1,12 @@
 import { query } from '../config/db.js';
 
 export const createUser = async ({ email, passwordHash, fullName, provider = 'local', googleId = null, baseCurrency = 'INR' }) => {
+  const safePassword = passwordHash || '';
   const result = await query(
     `INSERT INTO users (email, password_hash, full_name, provider, google_id, base_currency)
      VALUES ($1, $2, $3, $4, $5, $6)
      RETURNING id, email, full_name, provider, google_id, base_currency, created_at`,
-    [email.toLowerCase(), passwordHash, fullName, provider, googleId, baseCurrency]
+    [email.toLowerCase(), safePassword, fullName, provider, googleId, baseCurrency]
   );
   return result.rows[0];
 };

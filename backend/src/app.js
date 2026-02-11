@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import morgan from 'morgan';
 import path from 'path';
 import { env } from './config/env.js';
 import routes from './routes/index.js';
@@ -21,7 +20,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(morgan('dev'));
 app.use('/uploads', express.static(path.resolve('uploads')));
 
 app.use('/api', routes);

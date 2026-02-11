@@ -21,5 +21,6 @@ export const env = {
   smtpPass: process.env.SMTP_PASS,
   smtpFrom: process.env.SMTP_FROM,
   smtpEnvelopeFrom: process.env.SMTP_ENVELOPE_FROM,
+  brevoApiKey: process.env.BREVO_API_KEY,
   baseUrl: process.env.BASE_URL || 'http://localhost:4000'
 };

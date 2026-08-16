@@ -5,13 +5,16 @@ import app from './app.js';
 const start = async () => {
   try {
     await pool.query('SELECT 1');
-    app.listen(env.port, () => {
-      console.log(`Server running on port ${env.port}`);
-    });
+    console.log('Database connection OK');
   } catch (err) {
-    console.error('Failed to start server:', err.message);
-    process.exit(1);
+    console.error('Database connection failed during startup:');
+    console.error(err && err.stack ? err.stack : err);
+    console.error('Continuing to start the HTTP server so Render can detect the port.');
   }
+
+  app.listen(env.port, () => {
+    console.log(`Server running on port ${env.port}`);
+  });
 };
 
 start();

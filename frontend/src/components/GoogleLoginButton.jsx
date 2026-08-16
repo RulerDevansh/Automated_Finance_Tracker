@@ -1,5 +1,34 @@
 import { useEffect, useRef } from 'react';
 
+let googleScriptPromise = null;
+let googleInitializedClientId = null;
+
+const loadGoogleScript = () => {
+  if (window.google?.accounts) return Promise.resolve();
+
+  if (!googleScriptPromise) {
+    googleScriptPromise = new Promise((resolve, reject) => {
+      const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+
+      if (existingScript) {
+        existingScript.addEventListener('load', resolve, { once: true });
+        existingScript.addEventListener('error', () => reject(new Error('Google GSI script failed to load')), { once: true });
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error('Google GSI script failed to load'));
+      document.body.appendChild(script);
+    });
+  }
+
+  return googleScriptPromise;
+};
+
 const GoogleLoginButton = ({ onCredential, disabled }) => {
   const buttonRef = useRef(null);
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -7,39 +36,44 @@ const GoogleLoginButton = ({ onCredential, disabled }) => {
   useEffect(() => {
     if (!clientId || !buttonRef.current || disabled) return;
 
-    let script;
+    const initialize = async () => {
+      try {
+        await loadGoogleScript();
 
-    const initialize = () => {
-      if (!window.google || !window.google.accounts) return;
+        if (!window.google?.accounts) return;
 
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: ({ credential }) => credential && onCredential(credential),
-        auto_select: false
-      });
+        if (googleInitializedClientId !== clientId) {
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: ({ credential }) => credential && onCredential(credential),
+            auto_select: false,
+          });
+          googleInitializedClientId = clientId;
+        }
 
-      window.google.accounts.id.renderButton(buttonRef.current, {
-        theme: 'filled',
-        shape: 'pill',
-        width: 260,
-        size: 'large'
-      });
+        const buttonContainer = buttonRef.current;
+        buttonContainer.innerHTML = '';
+        window.google.accounts.id.renderButton(buttonContainer, {
+          theme: 'filled',
+          shape: 'pill',
+          width: 260,
+          size: 'large',
+        });
+      } catch (error) {
+        console.error('Google Sign-In initialization failed:', error);
+      }
     };
 
-    if (window.google && window.google.accounts) {
-      initialize();
-    } else {
-      script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.onload = initialize;
-      document.body.appendChild(script);
-    }
+    initialize();
 
     return () => {
-      if (script) document.body.removeChild(script);
-      window.google?.accounts.id.cancel();
+      if (window.google?.accounts?.id) {
+        try {
+          window.google.accounts.id.cancel();
+        } catch (error) {
+          console.warn('Google Sign-In cancel failed:', error);
+        }
+      }
     };
   }, [clientId, onCredential, disabled]);
 

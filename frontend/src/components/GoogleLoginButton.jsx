@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useState } from 'react';
 
 let googleScriptPromise = null;
 let googleInitializedClientId = null;
@@ -32,6 +33,7 @@ const loadGoogleScript = () => {
 const GoogleLoginButton = ({ onCredential, disabled }) => {
   const buttonRef = useRef(null);
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const [showRedirect, setShowRedirect] = useState(false);
 
   useEffect(() => {
     if (!clientId || !buttonRef.current || disabled) return;
@@ -61,6 +63,7 @@ const GoogleLoginButton = ({ onCredential, disabled }) => {
         });
       } catch (error) {
         console.error('Google Sign-In initialization failed:', error);
+        setShowRedirect(true);
       }
     };
 
@@ -81,7 +84,31 @@ const GoogleLoginButton = ({ onCredential, disabled }) => {
     return <p className="text-center text-sm text-red-600">Google Sign-In is not configured.</p>;
   }
 
-  return <div ref={buttonRef} className="flex justify-center" />;
+  const redirectToGoogle = () => {
+    const nonce = Math.random().toString(36).slice(2);
+    sessionStorage.setItem('google_nonce', nonce);
+    const redirectUri = `${window.location.origin}/google-callback`;
+    const params = new URLSearchParams({
+      client_id: clientId,
+      response_type: 'id_token',
+      scope: 'openid email profile',
+      redirect_uri: redirectUri,
+      nonce,
+      prompt: 'consent'
+    });
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div ref={buttonRef} className="flex justify-center" />
+      {showRedirect && (
+        <button type="button" onClick={redirectToGoogle} className="text-sm text-blue-600 underline">
+          Sign in with Google (redirect)
+        </button>
+      )}
+    </div>
+  );
 };
 
 export default GoogleLoginButton;

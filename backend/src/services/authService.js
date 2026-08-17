@@ -51,7 +51,14 @@ export const googleLogin = async ({ idToken, baseCurrency = 'INR' }) => {
     err.status = 500;
     throw err;
   }
-  const ticket = await googleClient.verifyIdToken({ idToken, audience: env.googleClientId });
+  let ticket;
+  try {
+    ticket = await googleClient.verifyIdToken({ idToken, audience: env.googleClientId });
+  } catch (e) {
+    const err = new Error('Invalid Google ID token');
+    err.status = 400;
+    throw err;
+  }
   const payload = ticket.getPayload();
   const googleId = payload.sub;
   const email = payload.email;

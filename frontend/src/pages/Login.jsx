@@ -25,9 +25,15 @@ export const Login = () => {
   const handleCredential = useCallback(async (credential) => {
     setError('');
     try {
+      console.log('Google credential received:', credential);
+      if (!credential) {
+        setError('Missing Google credential');
+        return;
+      }
       await googleLogin({ idToken: credential, baseCurrency });
       navigate('/dashboard');
     } catch (err) {
+      console.error('Google login error:', err);
       setError(err.response?.data?.message || 'Google login failed');
     }
   }, [googleLogin, baseCurrency, navigate]);

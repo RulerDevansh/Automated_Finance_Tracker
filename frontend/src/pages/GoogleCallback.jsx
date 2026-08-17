@@ -30,6 +30,11 @@ export const GoogleCallback = () => {
 
     const finish = async () => {
       try {
+        console.log('GoogleCallback idToken:', idToken, 'nonce:', nonce);
+        if (!idToken) {
+          setError('Missing Google token');
+          return;
+        }
         await googleLogin({ idToken, baseCurrency });
         navigate('/dashboard');
       } catch (err) {

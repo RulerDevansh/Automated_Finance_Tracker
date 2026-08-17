@@ -22,8 +22,9 @@ export const login = async (req, res, next) => {
 
 export const googleLogin = async (req, res, next) => {
   try {
-    const { idToken, baseCurrency } = req.body;
-    const result = await authService.googleLogin({ idToken, baseCurrency });
+    const { idToken, credential, baseCurrency } = req.body;
+    const tokenValue = idToken || credential;
+    const result = await authService.googleLogin({ idToken: tokenValue, baseCurrency });
     res.json(result);
   } catch (err) {
     next(err);
